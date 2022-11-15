@@ -12,33 +12,33 @@ from fastapi import APIRouter, Body
 user = APIRouter()
 app = FastAPI()
 
-def user_helper(student) -> dict:
+def user_helper(user) -> dict:
     
     return {
-        "id": str(student["_id"]),
-        "name": student["name"],
-        "age": student["age"],
-        "phone_number": student["phone_number"],
-        "password": student["name"],
-        "otp": student["otp"],
-        "path": student["path"]
+        "id": str(user["_id"]),
+        "name": user["name"],
+        "age": user["age"],
+        "phone_number": user["phone_number"],
+        "password": user["name"],
+        "otp": user["otp"],
+        "path": user["path"]
     }
 
 @app.get("/{id}")
 async def user(id):
-    student = await user_collection.find_one({"_id": ObjectId(id)})
+    user = await user_collection.find_one({"_id": ObjectId(id)})
     if user:
-        return user_helper(student)
+        return user_helper(user)
 
 @app.post("/")
 async def create(user:User):
     user = jsonable_encoder(user)
-    otp=''.join(random.choice(string.ascii_uppercase) for i in range(3)) + ''.join(random.choice(string.digits) for i in range(3))
-    otp1= ''.join(random.sample(otp,len(otp)))
-    user.update({'otp':otp1})
-    student = await user_collection.insert_one(user)
-    new_student = await user_collection.find_one({"_id": student.inserted_id})
-    return user_helper(new_student)
+    onetimepwd=''.join(random.choice(string.ascii_uppercase) for i in range(3)) + ''.join(random.choice(string.digits) for i in range(3))
+    otp= ''.join(random.sample(onetimepwd,len(onetimepwd)))
+    user.update({'otp':otp})
+    user_value = await user_collection.insert_one(user)
+    new_user = await user_collection.find_one({"_id": user_value.inserted_id})
+    return user_helper(new_user)
 
 
 @app.delete("/{id}")
@@ -49,11 +49,11 @@ async def delete(id: str):
 
 @app.put("/{id}")
 async def update(id,updateUser: UpdateUser):
-    student = await user_collection.find_one({"_id": ObjectId(id)})
+    user = await user_collection.find_one({"_id": ObjectId(id)})
     req = {k: v for k, v in updateUser.dict().items() if v is not None}
-    if student:
+    if user:
         updated_user = await user_collection.update_one(
             {"_id": ObjectId(id)}, {"$set": req}
         )
-    return user_helper(student)
+    return user_helper(user)
      
