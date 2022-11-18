@@ -19,8 +19,6 @@ def user_helper1(user) -> dict:
 
 @app.post("/login/token", tags=["login"])
 async def retrieve(form_data: OAuth2PasswordRequestForm=Depends()):
-    print(form_data.username)
-    print(form_data.password)
     user = await user_collection.find_one({"name": form_data.username})
     if user['password'] == form_data.password:
         return "success"
