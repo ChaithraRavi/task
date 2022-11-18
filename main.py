@@ -36,9 +36,6 @@ async def retrieve(form_data: OAuth2PasswordRequestForm=Depends()):
         return "failed"
 
 
-
-
-
 @app.get("/{id}")
 async def user(id):
     user = await user_collection.find_one({"_id": ObjectId(id)})

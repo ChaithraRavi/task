@@ -22,7 +22,6 @@ class User_details(BaseModel):
     user: User
     age: Optional[int]
     phone_number: Optional[str]
-    password: Optional[str]
     otp:  Optional[str]
     path: Optional[str]
     class Config:
@@ -31,7 +30,6 @@ class User_details(BaseModel):
                 "user": "user",
                 "age": 12,
                 "phone_number": "9438899000",
-                "password": "jkabdekjq",
                 "otp":  "ks234",
                 "path": "user/oneverse"
             }
