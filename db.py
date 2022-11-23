@@ -8,5 +8,5 @@ database = client.abc
 
 user_collection = database.get_collection("user")
 
-userDetails_collection = database.get_collection("user_deyails")
+userDetails_collection = database.get_collection("user_details")
 

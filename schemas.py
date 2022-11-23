@@ -3,10 +3,10 @@ from typing import Optional
 
 
 class User(BaseModel):
-    name : Optional[str]
-    password : Optional[str]
-    email : Optional[EmailStr]
-    is_active : Optional[bool]
+    name : str
+    password : str
+    email : EmailStr
+    is_active : bool
     class Config:
         schema_extra = {
             "example": {
@@ -20,10 +20,10 @@ class User(BaseModel):
 
 class User_details(BaseModel):
     user: User
-    age: Optional[int]
-    phone_number: Optional[str]
-    otp:  Optional[str]
-    path: Optional[str]
+    age: int
+    phone_number: str
+    otp:  str
+    path: str
     class Config:
         schema_extra = {
             "example": {
@@ -34,4 +34,3 @@ class User_details(BaseModel):
                 "path": "user/oneverse"
             }
         }
-        
