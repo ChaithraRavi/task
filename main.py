@@ -6,26 +6,9 @@ from fastapi.encoders import jsonable_encoder
 import random, string
 from fastapi.security import OAuth2PasswordRequestForm
 from login import oauth2_scheme
-
+from schemas import user_helper, userDetails_helper
 app = FastAPI()
 
-def user_helper(user) -> dict:
-    return {
-        "name": user["name"],
-        "password": user["password"],
-        "email": user["email"],
-        "is_active": user["is_active"]
-    }
-
-def userDetails_helper(user) -> dict:
-    return {
-        "id": str(user["_id"]),
-        "age": user["age"],
-        "phone_number": user["phone_number"],
-        "password": user["name"],
-        "otp": user["otp"],
-        "path": user["path"]
-    }
     
 @app.post("/login/token", tags=["login"])
 async def retrieve(form_data: OAuth2PasswordRequestForm=Depends()):
