@@ -12,13 +12,21 @@ from jwt_bearer import jwtBearer
 app = FastAPI()
 
 
+def check_user(data: User,user_details):
+    if user_details['email'] == data['email'] and user_details['password'] == data['password']:
+        return True
+    return False
+ 
+def get_otp():
+    onetimepwd=''.join(random.choice(string.ascii_uppercase) for i in range(3)) + ''.join(random.choice(string.digits) for i in range(3))
+    return ''.join(random.sample(onetimepwd,len(onetimepwd)))
+
 @app.post("/create_user",dependencies=[Depends(jwtBearer())])
 async def create_user(user:User):
     user = jsonable_encoder(user)
     hashed_pwd = encrypt_password(user['password'])
     user.update({'password':hashed_pwd})
-    onetimepwd=''.join(random.choice(string.ascii_uppercase) for i in range(3)) + ''.join(random.choice(string.digits) for i in range(3))
-    otp= ''.join(random.sample(onetimepwd,len(onetimepwd)))
+    otp = get_otp()
     user.update({'otp':otp})
     user_value = await user_collection.insert_one(user)
     new_user = await user_collection.find_one({"_id": user_value.inserted_id})
@@ -34,11 +42,6 @@ async def user(id):
         return "User not found"
 
 
-def check_user(data: User,user_details):
-    if user_details['email'] == data['email'] and user_details['password'] == data['password']:
-        return True
-    return False
- 
 @app.post("/user/signup")
 async def user(user: User = Body(...)):
     user = jsonable_encoder(user)
