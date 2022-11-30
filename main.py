@@ -1,25 +1,31 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Body
 from schemas import User, User_details
 from db import user_collection, userDetails_collection
 from bson.objectid import ObjectId
 from fastapi.encoders import jsonable_encoder
 import random, string
-from fastapi.security import OAuth2PasswordRequestForm
-from login import oauth2_scheme
-from schemas import user_helper, userDetails_helper
+from login import encrypt_password
+from helper import user_helper,userDetails_helper
+from jwt_handler import signJWT
+from jwt_bearer import jwtBearer
+
 app = FastAPI()
 
+
+@app.post("/create_user",dependencies=[Depends(jwtBearer())])
+async def create_user(user:User):
+    user = jsonable_encoder(user)
+    hashed_pwd = encrypt_password(user['password'])
+    user.update({'password':hashed_pwd})
+    onetimepwd=''.join(random.choice(string.ascii_uppercase) for i in range(3)) + ''.join(random.choice(string.digits) for i in range(3))
+    otp= ''.join(random.sample(onetimepwd,len(onetimepwd)))
+    user.update({'otp':otp})
+    user_value = await user_collection.insert_one(user)
+    new_user = await user_collection.find_one({"_id": user_value.inserted_id})
+    return user_helper(new_user)
     
-@app.post("/login/token", tags=["login"])
-async def retrieve(form_data: OAuth2PasswordRequestForm=Depends()):
-    user = await user_collection.find_one({"name": form_data.username})
-    if user['password'] == form_data.password:
-        return "success"
-    else:
-        return "failed"
 
-
-@app.get("/{id}")
+@app.get("/{id}",dependencies=[Depends(jwtBearer())])
 async def user(id):
     user = await user_collection.find_one({"_id": ObjectId(id)})
     if user:
@@ -28,52 +34,36 @@ async def user(id):
         return "User not found"
 
 
-@app.post("/add_user")
-async def create(user:User):
+def check_user(data: User,user_details):
+    if user_details['email'] == data['email'] and user_details['password'] == data['password']:
+        return True
+    return False
+ 
+@app.post("/user/signup")
+async def user(user: User = Body(...)):
     user = jsonable_encoder(user)
-    user_value = await user_collection.insert_one(user)
-    new_user = await user_collection.find_one({"_id": user_value.inserted_id})
-    return user_helper(new_user)
-        
-
-@app.post("/add_userDetails")
-async def create(user:User_details,token: str=Depends(oauth2_scheme)):
-    user = jsonable_encoder(user)
+    hashed_pwd = encrypt_password(user['password'])
+    user.update({'password':hashed_pwd})
     onetimepwd=''.join(random.choice(string.ascii_uppercase) for i in range(3)) + ''.join(random.choice(string.digits) for i in range(3))
     otp= ''.join(random.sample(onetimepwd,len(onetimepwd)))
     user.update({'otp':otp})
-    user_value = await userDetails_collection.insert_one(user)
-    new_user = await userDetails_collection.find_one({"_id": user_value.inserted_id})
-    return userDetails_helper(new_user)
+    user_value = await user_collection.insert_one(user)
+    return signJWT(user['name'])    
 
 
-@app.delete("/{id}")
-async def delete(id: str,token: str=Depends(oauth2_scheme)):
-    await user_collection.delete_one({"_id": ObjectId(id)})
-    return True
-
-
-@app.delete("/{id}")
-async def delete(id: str,token: str=Depends(oauth2_scheme)):
-    await userDetails_collection.delete_one({"_id": ObjectId(id)})
-    return True
-        
-
-@app.put("/{id}")
-async def update(id,user_model:User,token: str=Depends(oauth2_scheme)):
-    user = await user_collection.find_one({"_id": ObjectId(id)})
-    req = {k: v for k, v in user_model.dict().items() if v is not None}
-    if not user:
-        "User not found"
-    else:
-        updated_user = await user.update_one(
-            {"_id": ObjectId(id)}, {"$set": req}
-        )
-    return user_helper(user)
-
-
-@app.put("/{id}")
-async def update(id,user_model:User_details,token: str=Depends(oauth2_scheme)):
+@app.post("/user/login")
+async def user_login(user: User = Body(...)):
+    user = jsonable_encoder(user)
+    user_details = await user_collection.find_one({"email": user['email']})
+    if check_user(user,user_details):
+        return signJWT(user['email'])
+    return {
+        "error": "Wrong login details!"
+    }
+    
+    
+@app.put("userDetails_update/{id}",dependencies=[Depends(jwtBearer())])
+async def update(id,user_model:User_details):
     user = await userDetails_collection.find_one({"_id": ObjectId(id)})
     req = {k: v for k, v in user_model.dict().items() if v is not None}
     if not user:
@@ -85,11 +75,7 @@ async def update(id,user_model:User_details,token: str=Depends(oauth2_scheme)):
     return userDetails_helper(user)
 
 
-@app.post("/add_user_auth")
-async def create_user_auth(user:User, token: str=Depends(oauth2_scheme)):
-    user = jsonable_encoder(user)
-    user = await user_collection.insert_one(user)
-    if user:
-        "User not found"
-    else:    
-        return user_collection(user)
+@app.delete("/{id}",dependencies=[Depends(jwtBearer())])
+async def delete(id: str):
+    await user_collection.delete_one({"_id": ObjectId(id)})
+    return True

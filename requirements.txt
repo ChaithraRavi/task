@@ -4,3 +4,4 @@ motor==2.5.1
 pydantic[email]
 python-decouple==3.6
 passlib[bcrypt]
+PyJWT == 1.7.1
