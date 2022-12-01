@@ -7,10 +7,9 @@ import random, string
 from login import encrypt_password
 from helper import user_helper,userDetails_helper
 from jwt_handler import signJWT
-from jwt_bearer import jwtBearer
+from jwt_bearer import middleware
 
 app = FastAPI()
-
 
 def check_user(data: User,user_details):
     if user_details['email'] == data['email'] and user_details['password'] == data['password']:
@@ -21,7 +20,8 @@ def get_otp():
     onetimepwd=''.join(random.choice(string.ascii_uppercase) for i in range(3)) + ''.join(random.choice(string.digits) for i in range(3))
     return ''.join(random.sample(onetimepwd,len(onetimepwd)))
 
-@app.post("/create_user",dependencies=[Depends(jwtBearer())])
+
+@app.post("/create_user",dependencies=[Depends(middleware())])
 async def create_user(user:User):
     user = jsonable_encoder(user)
     hashed_pwd = encrypt_password(user['password'])
@@ -33,7 +33,7 @@ async def create_user(user:User):
     return user_helper(new_user)
     
 
-@app.get("/{id}",dependencies=[Depends(jwtBearer())])
+@app.get("/{id}",dependencies=[Depends(middleware())])
 async def user(id):
     user = await user_collection.find_one({"_id": ObjectId(id)})
     if user:
@@ -51,6 +51,7 @@ async def user(user: User = Body(...)):
     otp= ''.join(random.sample(onetimepwd,len(onetimepwd)))
     user.update({'otp':otp})
     user_value = await user_collection.insert_one(user)
+    import pdb;pdb.set_trace()
     return signJWT(user['name'])    
 
 
@@ -65,7 +66,7 @@ async def user_login(user: User = Body(...)):
     }
     
     
-@app.put("userDetails_update/{id}",dependencies=[Depends(jwtBearer())])
+@app.put("userDetails_update/{id}",dependencies=[Depends(middleware())])
 async def update(id,user_model:User_details):
     user = await userDetails_collection.find_one({"_id": ObjectId(id)})
     req = {k: v for k, v in user_model.dict().items() if v is not None}
@@ -78,7 +79,7 @@ async def update(id,user_model:User_details):
     return userDetails_helper(user)
 
 
-@app.delete("/{id}",dependencies=[Depends(jwtBearer())])
+@app.delete("/{id}",dependencies=[Depends(middleware())])
 async def delete(id: str):
     await user_collection.delete_one({"_id": ObjectId(id)})
     return True
