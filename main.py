@@ -8,7 +8,6 @@ from login import encrypt_password
 from helper import user_helper,userDetails_helper
 from jwt_handler import signJWT
 from jwt_bearer import jwtBearer
-from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI()
 
