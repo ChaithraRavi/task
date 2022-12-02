@@ -2,12 +2,12 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Request, HTTPException
 from jwt_handler import decodeJWT
 
-class middleware(HTTPBearer):
+class jwtBearer(HTTPBearer):
     def __init__(self, auto_Error: bool = True):
-        super(middleware,self).__init__(auto_error=auto_Error)
+        super(jwtBearer,self).__init__(auto_error=auto_Error)
         
     async def __call__(self, request: Request):
-        credentials: HTTPAuthorizationCredentials = await super(middleware, self).__call__(request)
+        credentials: HTTPAuthorizationCredentials = await super(jwtBearer, self).__call__(request)
         
         if credentials:
             if not credentials.schema == "Bearer":
