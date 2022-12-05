@@ -18,6 +18,7 @@ class jwtBearer(HTTPBearer):
             raise HTTPException(status_code=403, detail="Invalid authorization code.")
         
     def verify_jwt(self,jwtoken:str):
+        isTokenValid: bool = False
         try:
             payload = decodeJWT(jwtoken)
         except:
@@ -25,4 +26,5 @@ class jwtBearer(HTTPBearer):
         if payload:
             isTokenValid = True
         return isTokenValid
-            
+
+    

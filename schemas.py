@@ -25,7 +25,7 @@ class User_details(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-                "user": "user",
+                "user": "userID",
                 "age": 12,
                 "phone_number": "9438899000",
                 "otp":  "ks234",

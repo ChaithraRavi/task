@@ -8,8 +8,13 @@ from login import encrypt_password
 from helper import user_helper,userDetails_helper
 from jwt_handler import signJWT
 from jwt_bearer import jwtBearer
+from middleware import MyMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI()
+
+my_middleware = MyMiddleware()
+app.add_middleware(BaseHTTPMiddleware, dispatch=my_middleware)
 
 def check_user(data: User,user_details):
     if user_details['email'] == data['email'] and user_details['password'] == data['password']:
@@ -51,7 +56,6 @@ async def user(user: User = Body(...)):
     otp= ''.join(random.sample(onetimepwd,len(onetimepwd)))
     user.update({'otp':otp})
     user_value = await user_collection.insert_one(user)
-    import pdb;pdb.set_trace()
     return signJWT(user['name'])    
 
 
