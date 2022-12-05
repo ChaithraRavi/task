@@ -7,7 +7,7 @@ import random, string
 from login import encrypt_password
 from helper import user_helper,userDetails_helper
 from jwt_handler import signJWT
-from jwt_bearer import jwtBearer
+from jwt_bearer import JwtBearer
 from middleware import Middleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -26,7 +26,7 @@ def get_otp():
     return ''.join(random.sample(onetimepwd,len(onetimepwd)))
 
 
-@app.post("/create_user",dependencies=[Depends(jwtBearer())])
+@app.post("/create_user",dependencies=[Depends(JwtBearer())])
 async def create_user(user:User):
     user = jsonable_encoder(user)
     hashed_pwd = encrypt_password(user['password'])
@@ -38,7 +38,7 @@ async def create_user(user:User):
     return user_helper(new_user)
     
 
-@app.get("/{id}",dependencies=[Depends(jwtBearer())])
+@app.get("/{id}",dependencies=[Depends(JwtBearer())])
 async def user(id):
     user = await user_collection.find_one({"_id": ObjectId(id)})
     if user:
@@ -70,7 +70,7 @@ async def user_login(user: User = Body(...)):
     }
     
     
-@app.put("userDetails_update/{id}",dependencies=[Depends(jwtBearer())])
+@app.put("userDetails_update/{id}",dependencies=[Depends(JwtBearer())])
 async def update(id,user_model:User_details):
     user = await userDetails_collection.find_one({"_id": ObjectId(id)})
     req = {k: v for k, v in user_model.dict().items() if v is not None}
@@ -83,7 +83,7 @@ async def update(id,user_model:User_details):
     return userDetails_helper(user)
 
 
-@app.delete("/{id}",dependencies=[Depends(jwtBearer())])
+@app.delete("/{id}",dependencies=[Depends(JwtBearer())])
 async def delete(id: str):
     await user_collection.delete_one({"_id": ObjectId(id)})
     return True
