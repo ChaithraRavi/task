@@ -1,8 +1,8 @@
 from fastapi import Request
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials
 from fastapi import Request, HTTPException
 
-class MyMiddleware(HTTPBearer):
+class MyMiddleware:
     def __init__(self, auto_Error: bool = True):
         super(MyMiddleware,self).__init__(auto_error=auto_Error)
         
