@@ -10,7 +10,6 @@ from jwt_handler import signJWT
 from jwt_bearer import jwtBearer
 from middleware import Middleware
 from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi.security import HTTPBearer
 
 app = FastAPI()
 
