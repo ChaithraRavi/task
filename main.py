@@ -8,14 +8,14 @@ from login import encrypt_password
 from helper import user_helper,userDetails_helper
 from jwt_handler import signJWT
 from jwt_bearer import jwtBearer
-from middleware import MyMiddleware
+from middleware import Middleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.security import HTTPBearer
 
 app = FastAPI()
 
-my_middleware = MyMiddleware(HTTPBearer)
-app.add_middleware(BaseHTTPMiddleware, dispatch=my_middleware)
+middleware = Middleware()
+app.add_middleware(BaseHTTPMiddleware, dispatch=middleware)
 
 def check_user(data: User,user_details):
     if user_details['email'] == data['email'] and user_details['password'] == data['password']:
