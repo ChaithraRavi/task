@@ -1,7 +1,6 @@
 from fastapi import Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Request, HTTPException
-from jwt_handler import decodeJWT
 
 class MyMiddleware(HTTPBearer):
     def __init__(self, auto_Error: bool = True):
