@@ -10,10 +10,11 @@ from jwt_handler import signJWT
 from jwt_bearer import jwtBearer
 from middleware import MyMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi.security import HTTPBearer
 
 app = FastAPI()
 
-my_middleware = MyMiddleware()
+my_middleware = MyMiddleware(HTTPBearer)
 app.add_middleware(BaseHTTPMiddleware, dispatch=my_middleware)
 
 def check_user(data: User,user_details):
